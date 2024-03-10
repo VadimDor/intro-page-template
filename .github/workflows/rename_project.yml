@@ -1,6 +1,7 @@
 name: Rename the project from template
 
-on: [push]
+on: [push,workflow_dispatch]
+  # Allows you to run this workflow manually from the Actions tab
 
 permissions: write-all
 
@@ -29,6 +30,13 @@ jobs:
         id: is_template
         run: echo "::set-output name=is_template::$(ls .github/template.yml &> /dev/null && echo true || echo false)"
 
+      - name: Substitute  variables
+        if: steps.is_template.outputs.is_template == 'true'
+        run: |
+          echo "Substituting variables with -a(author) ${{ env.REPOSITORY_OWNER }} -n(name) ${{ env.REPOSITORY_NAME }} -u(urlname) ${{ env.REPOSITORY_URLNAME }}"
+          .github/substitute.sh 
+
+        
       - name: Rename the project
         if: steps.is_template.outputs.is_template == 'true'
         run: |
